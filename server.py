@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 
 
 
@@ -29,6 +31,8 @@ class User(db.Model):
 
 @app.route("/login_or_sign_up", methods=["GET", "POST"])
 def login_or_sign_up():
+
+    #login
     if request.method == "POST":
         if request.form["submit"] == "log_in":
             l_username = request.form["l_username"]
@@ -39,12 +43,13 @@ def login_or_sign_up():
             if not user:
                 print("this username does not exist, Please Register")
                 return redirect(url_for('login_or_sign_up'))
-            elif not user.password == l_password:
+            elif not check_password_hash(user.password, l_password):
                 print("Password zincorrect, PLease Try Again")
                 return redirect(url_for('login_or_sign_up'))
             else:
                 print("Login")
         
+        #sign up
         if request.form["submit"] == "Sign_up":
             s_username = request.form["s_username"]
             s_fname = request.form["s_fname"]
@@ -54,13 +59,19 @@ def login_or_sign_up():
             s_password = request.form["s_password"]
             print(s_username, s_fname, s_lname, s_phoneno, s_email, s_password)
 
+            hash_and_salted_password = generate_password_hash(
+                s_password,
+                method='pbkdf2:sha256',
+                salt_length=8
+            )
+
             new_user = User(
                 username = s_username,
                 fname = s_fname,
                 lname = s_lname,
                 phoneno = s_phoneno,
                 email = s_email,
-                password = s_password
+                password = hash_and_salted_password
             )
             db.session.add(new_user)
             db.session.commit()
