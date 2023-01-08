@@ -4,11 +4,20 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 
 
-
 app = Flask(__name__)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+#to be codded 
+# #login manager
+# login_manager = LoginManager()
+# login_manager.init_app(app)
+
+# @login_manager.user_loader
+# def load_user(user_id):
+#     return User.query.get(int(user_id))
 
 
 #Database Table Creation Section
@@ -20,7 +29,7 @@ db = SQLAlchemy(app)
 #db.create_all()
 
 #Sign up table which contains data of user
-class User(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True)
     fname = db.Column(db.String(100))
