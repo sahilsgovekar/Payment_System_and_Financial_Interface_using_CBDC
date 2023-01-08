@@ -18,13 +18,16 @@
             <h2 class="title">Sign in</h2>
             <div class="input-field">
               <i class="fas fa-user"></i>
-              <input type="text" name="siname" placeholder="Username" />
+              <input type="text" name="l_username" placeholder="Username" />
             </div>
             <div class="input-field">
               <i class="fas fa-lock"></i>
-              <input type="password" name="sipass" placeholder="Password" />
+              <input type="password" name="l_password" placeholder="Password" />
             </div>
             <input type="submit" name="submit" class="btn solid" value="log_in" />
+            
+            
+            <!-- login using social media -->
             <!-- <p class="social-text">Or Sign in with social platforms</p>
             <div class="social-media">
               <a href="#" class="social-icon">
@@ -40,22 +43,41 @@
                 <i class="fab fa-linkedin-in"></i>
               </a>
             </div> -->
+          
+          
+          
           </form>
           <form action="/" method="post" class="sign-up-form">
             <h2 class="title">Sign up</h2>
             <div class="input-field">
               <i class="fas fa-user"></i>
-              <input type="text" placeholder="Username" name="username"/>
+              <input type="text" placeholder="Decide Your Username" name="s_username"/>
             </div>
             <div class="input-field">
+              <i class="fas fa-user"></i>
+              <input type="text" placeholder="First Name" name="s_fname"/>
+            </div>
+            <div class="input-field">
+              <i class="fas fa-user"></i>
+              <input type="text" placeholder="Last Name" name="s_lname"/>
+            </div>
+            <div class="input-field">
+              <i class="fas fa-user"></i>
+              <input type="tel" id="phone" name="s_phoneno" placeholder="Pho Number" required>
+            </div>
+
+            <div class="input-field">
               <i class="fas fa-envelope"></i>
-              <input type="email" placeholder="Email" name="email" />
+              <input type="email" placeholder="Email" name="s_email" />
             </div>
             <div class="input-field">
               <i class="fas fa-lock"></i>
-              <input type="password" placeholder="Password" name="pass"/>
+              <input type="password" placeholder="Password" name="s_password"/>
             </div>
             <input type="submit" class="btn" value="Sign_up" name="submit" />
+            
+            
+            <!-- Signup using Social media -->
             <!-- <p class="social-text">Or Sign up with social platforms</p>
             <div class="social-media">
               <a href="#" class="social-icon">
@@ -71,6 +93,8 @@
                 <i class="fab fa-linkedin-in"></i>
               </a>
             </div> -->
+          
+          
           </form>
         </div>
       </div>
