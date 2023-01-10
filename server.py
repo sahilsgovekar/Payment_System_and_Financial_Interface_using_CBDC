@@ -89,6 +89,10 @@ def login_or_sign_up():
 
     return render_template("loginorsignup.html")
 
+@app.route("/")
+def home():
+    return redirect(url_for('login_or_sign_up'))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
