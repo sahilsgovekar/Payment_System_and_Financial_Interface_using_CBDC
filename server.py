@@ -90,8 +90,14 @@ def login_or_sign_up():
     return render_template("loginorsignup.html")
 
 @app.route("/")
-def home():
+def main():
     return redirect(url_for('login_or_sign_up'))
+
+
+#home page or main landing page
+@app.route("/home")
+def home():
+    return render_template("home.html")
 
 
 if __name__ == "__main__":
