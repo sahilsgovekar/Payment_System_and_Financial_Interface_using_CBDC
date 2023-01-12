@@ -99,6 +99,27 @@ def main():
 def home():
     return render_template("home.html")
 
+#pay section
+
+#username pay
+@app.route("/pay/username")
+def pay_username():
+    return render_template("pay_username.html")
+
+#qr pay
+@app.route("/pay/qr")
+def pay_qr():
+    return render_template("pay_qr.html")
+
+#phone no pay
+@app.route("/pay/phoneno")
+def pay_phoneno():
+    return render_template("pay_phoneno.html")
+
+#bank transfer
+@app.route("/pay/banktransfer")
+def pay_banktransfer():
+    return render_template("pay_banktransfer.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
