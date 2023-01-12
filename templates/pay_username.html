@@ -28,6 +28,7 @@
 
     <link href="{{ url_for('static', filename='cover.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='homecss.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='pay.css') }}" rel="stylesheet">
 
 </head>
 
@@ -59,6 +60,20 @@
             <div>
                 <h2 class="hr-lines">   PAY USERNAME    </h2>
             </div>
+
+            <form action="" method="post">
+                <label for="">username</label>
+                <br>
+                <input type="text" name="username" id="">
+                <br><br>
+                <label for="">amount</label>
+                <br>
+                <input type="number" name="amount" id="">    
+                <br><br>
+                <input type="submit" value="PAY" class="btn btn-outline-success btn-lg">
+            </form>
+ 
+
 
 
         </main>

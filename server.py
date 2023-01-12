@@ -84,6 +84,13 @@ def login_or_sign_up():
             )
             db.session.add(new_user)
             db.session.commit()
+
+            #database of new user
+            class User(UserMixin, db.Model):
+                transcation_id = db.Column(db.Integer, primary_key=True)
+                transaction_amt = db.Column(db.Integer)
+                remaning_amt = db.Column(db.Integer)
+
             print("new user data inserted into database")
 
 
@@ -102,8 +109,12 @@ def home():
 #pay section
 
 #username pay
-@app.route("/pay/username")
+@app.route("/pay/username", methods=["GET", "POST"])
 def pay_username():
+    if request.method == 'POST':
+        p_username = request.form["username"]
+        p_amount = request.form["amount"]
+        print(p_amount, p_username)
     return render_template("pay_username.html")
 
 #qr pay
