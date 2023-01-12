@@ -46,7 +46,7 @@ def login_or_sign_up():
         if request.form["submit"] == "log_in":
             l_username = request.form["l_username"]
             l_password = request.form["l_password"]
-            print(l_username, l_password)
+            print(l_username, l_password) 
 
             user = User.query.filter_by(username=l_username).first()
             if not user:
@@ -95,7 +95,7 @@ def main():
 
 
 #home page or main landing page
-@app.route("/home")
+@app.route("/home", methods=["GET", "POST"])
 def home():
     return render_template("home.html")
 
