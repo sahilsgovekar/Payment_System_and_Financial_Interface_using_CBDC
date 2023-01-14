@@ -58,21 +58,28 @@
         <!-- main sectrion content -->
         <main class="px-3">
             <div>
-                <h2 class="hr-lines">   PAY USERNAME    </h2>
+                <h2 class="hr-lines"> PAY USERNAME </h2>
             </div>
 
             <form action="" method="post">
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                        <p>{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
                 <label for="">username</label>
                 <br>
                 <input type="text" name="username" id="">
                 <br><br>
                 <label for="">amount</label>
                 <br>
-                <input type="number" name="amount" id="">    
+                <input type="number" name="amount" id="">
                 <br><br>
                 <input type="submit" value="PAY" class="btn btn-outline-success btn-lg">
             </form>
- 
+
 
 
 

@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
+# import sqlite3
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-
+from datetime import date, datetime
 
 app = Flask(__name__)
 
@@ -11,7 +12,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+# dbs = sqlite3.connect("users.db")
 
+# cursor = dbs.cursor()
 
 
 #to be codded 
@@ -29,12 +32,13 @@ def load_user(user_id):
 
 #to create tables
 #inside terminal
-#from server import app, db
-#app.app_context().push()
-#db.create_all()
+# from server import app, db
+# app.app_context().push()
+# db.create_all()
 
 #Sign up table which contains data of user
 class User(UserMixin, db.Model):
+    __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True)
     fname = db.Column(db.String(100))
@@ -42,10 +46,32 @@ class User(UserMixin, db.Model):
     phoneno = db.Column(db.String(100))
     email = db.Column(db.String(100))
     password = db.Column(db.String(100))
+    
+# cursor.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, username varchar(250) NOT NULL UNIQUE, fname varchar(250), lname varchar(250), phoneno varchar(250), email varchar(250), password varchar(250))")
+   
+    # usernamess = db.relationship('userBalance', backref='user')
 
-# class userBalance(UserMixin, db.Model):
-#     username = db.Column(db.String(100), primary_key=True)
-#     balance = db.Column(db.String(100))
+class remBal(UserMixin, db.Model):
+    # __tablename__ = "users_balances"
+    # username = db.Column(db.String(100), primary_key=True, db.ForeignKey('user.username'))
+    username = db.Column(db.String(100), primary_key=True)
+    balance = db.Column(db.Integer)
+
+# cursor.execute("CREATE TABLE balances (username varchar(250) PRIMARY KEY, balance INTEGER)")
+
+class clientTranscation(UserMixin, db.Model):
+    # __tablename__ = "client_transcation"
+    transcation_id = db.Column(db.String(100), primary_key=True)
+    f_username = db.Column(db.String(100))
+    t_username = db.Column(db.String(100))
+    amount = db.Column(db.String(100))
+    date = db.Column(db.String(100))
+    time = db.Column(db.String(100))
+
+
+#other class section
+
+
 
 
 
@@ -106,6 +132,17 @@ def login_or_sign_up():
             db.session.add(new_user)
             db.session.commit()
 
+            # cursor.execute(f"INSERT INTO users VALUES({s_username}, {s_fname}, {s_lname}, {s_phoneno}, {s_email}, {hash_and_salted_password})")
+
+            new_ub = remBal(
+                username = s_username,
+                balance = 1000
+            )
+            db.session.add(new_ub)
+            db.session.commit()
+            
+            # cursor.execute(f"INSERT INTO balances VALUES({s_username}, 100)")
+
             login_user(new_user)
             return redirect(url_for("home"))
 
@@ -150,8 +187,44 @@ def logout():
 def pay_username():
     if request.method == 'POST':
         p_username = request.form["username"]
-        p_amount = request.form["amount"]
-        print(p_amount, p_username)
+        p_amount = int(request.form["amount"])
+        # remBal.query.filter_by(username=request.form.get('l_username')).first()
+        # User.query.filter_by(username=l_username).first()
+        fuser = remBal.query.filter_by(username=current_user.username).first()
+        print(fuser.balance, p_username, p_amount)
+        if fuser.balance < p_amount:
+            flash("Insuffecient amount")
+            return redirect(url_for('pay_username'))
+        else:
+            tuser = remBal.query.filter_by(username=p_username).first()
+            if not tuser:
+                flash("Username dosent exist")
+                return redirect(url_for('pay_username'))
+            else:
+                #updating database
+                tuser.balance += p_amount
+                fuser.balance -= p_amount
+                db.session.commit()
+                flash(f"{p_amount} sucessfully sent to {p_username}")
+                obj = clientTranscation.query.all()
+                tno = int(obj[-1].transcation_id)
+                now = datetime.now()
+                current_time = now.strftime("%H:%M:%S")
+                f_username = fuser.username
+                new_trans = clientTranscation(
+                    transcation_id = tno + 1,
+                    f_username = f_username,
+                    t_username = p_username,
+                    amount = p_amount,
+                    date = date.today(),
+                    time = current_time
+                )
+                db.session.add(new_trans)
+                db.session.commit()
+
+
+
+
     return render_template("pay_username.html")
 
 #qr pay
