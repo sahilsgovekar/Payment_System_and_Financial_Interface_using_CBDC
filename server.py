@@ -225,22 +225,60 @@ def pay_username():
 
 
 
-    return render_template("pay_username.html")
+    return render_template("pay_username.html", username=current_user.username, logged_in=True)
 
 #qr pay
-@app.route("/pay/qr")
+@app.route("/pay/qr", methods=["GET", "POST"])
 @login_required
 def pay_qr():
     return render_template("pay_qr.html")
 
 #phone no pay
-@app.route("/pay/phoneno")
+@app.route("/pay/phoneno", methods=["GET", "POST"])
 @login_required
 def pay_phoneno():
-    return render_template("pay_phoneno.html")
+    if request.method == 'POST':
+        p_phonenumber = request.form["pno"]
+        p_amount = int(request.form["amount"])
+        # remBal.query.filter_by(username=request.form.get('l_username')).first()
+        # fu = User.query.filter_by(phoneno=p_phonenumber).first()
+        fuser = remBal.query.filter_by(username=current_user.username).first()
+        if fuser.balance < p_amount:
+            flash("Insuffecient amount")
+            return redirect(url_for('pay_phoneno'))
+        else:
+            tu = User.query.filter_by(phoneno=p_phonenumber).first()
+            if not tu:
+                flash("Phone Number dosent exist")
+                return redirect(url_for('pay_username'))
+            else:
+                #updating database
+                tuser = remBal.query.filter_by(username=tu.username).first()
+                tuser.balance += p_amount
+                fuser.balance -= p_amount
+                db.session.commit()
+                flash(f"{p_amount} sucessfully sent to {p_phonenumber}")
+                obj = clientTranscation.query.all()
+                tno = int(obj[-1].transcation_id)
+                now = datetime.now()
+                current_time = now.strftime("%H:%M:%S")
+                f_username = fuser.username
+                new_trans = clientTranscation(
+                    transcation_id = tno + 1,
+                    f_username = f_username,
+                    t_username = p_phonenumber,
+                    amount = p_amount,
+                    date = date.today(),
+                    time = current_time
+                )
+                db.session.add(new_trans)
+                db.session.commit()
+
+
+    return render_template("pay_phoneno.html", username=current_user.username, logged_in=True)
 
 #bank transfer
-@app.route("/pay/banktransfer")
+@app.route("/pay/banktransfer", methods=["GET", "POST"])
 @login_required
 def pay_banktransfer():
     return render_template("pay_banktransfer.html")

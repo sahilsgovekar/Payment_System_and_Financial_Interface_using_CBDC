@@ -43,7 +43,7 @@
         <!-- Heading include username from database and nav bar -->
         <header class="mb-auto">
             <div>
-                <h3 class="float-md-start mb-0">Username of user</h3>
+                <h3 class="float-md-start mb-0">{{username}}</h3>
                 <nav class="nav nav-masthead justify-content-center float-md-end">
                     <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="#">Pay</a>
                     <a class="nav-link fw-bold py-1 px-0" href="#">Investment</a>
@@ -56,6 +56,32 @@
 
         <!-- main sectrion content -->
         <main class="px-3">
+            <div>
+                <h2 class="hr-lines"> PAY PHONENO </h2>
+            </div>
+
+            <form action="" method="post">
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                        <p>{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                <label for="">phonenumber</label>
+                <br>
+                <input type="number" name="pno" id="">
+                <br><br>
+                <label for="">amount</label>
+                <br>
+                <input type="number" name="amount" id="">
+                <br><br>
+                <input type="submit" value="PAY" class="btn btn-outline-success btn-lg">
+            </form>
+
+
+
+
 
 
         </main>
