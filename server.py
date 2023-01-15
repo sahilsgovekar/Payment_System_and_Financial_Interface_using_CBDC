@@ -48,6 +48,7 @@ class User(UserMixin, db.Model):
     phoneno = db.Column(db.String(100))
     email = db.Column(db.String(100))
     password = db.Column(db.String(100))
+
     
 # cursor.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, username varchar(250) NOT NULL UNIQUE, fname varchar(250), lname varchar(250), phoneno varchar(250), email varchar(250), password varchar(250))")
    
@@ -69,6 +70,24 @@ class clientTranscation(UserMixin, db.Model):
     amount = db.Column(db.String(100))
     date = db.Column(db.String(100))
     time = db.Column(db.String(100))
+
+class lnAct(UserMixin, db.Model):
+    # __tablename__ = "users_balances"
+    # username = db.Column(db.String(100), primary_key=True, db.ForeignKey('user.username'))
+    username = db.Column(db.String(100), primary_key=True)
+    debt = db.Column(db.Integer)
+    credits = db.Column(db.Integer)
+    score = db.Column(db.Integer)
+
+class lnTranscation(UserMixin, db.Model):
+    # __tablename__ = "client_transcation"
+    transcation_id = db.Column(db.String(100), primary_key=True)
+    username = db.Column(db.String(100))
+    amount = db.Column(db.String(100))
+    rem_debt = db.Column(db.Integer)
+    date = db.Column(db.String(100))
+    time = db.Column(db.String(100))
+
 
 
 #other class section
@@ -144,6 +163,16 @@ def login_or_sign_up():
             )
             db.session.add(new_ub)
             db.session.commit()
+
+            new_lact = lnAct(
+                username = s_username,
+                debt = 0,
+                credits = 500,
+                score = 500
+            )
+
+            db.session.add(new_lact)
+            db.session.commit()
             
             # cursor.execute(f"INSERT INTO balances VALUES({s_username}, 100)")
             login_user(new_user)
@@ -174,7 +203,8 @@ def main():
 def home():
     # print(current_user.username)
     cu_bal = remBal.query.filter_by(username=current_user.username).first()
-    return render_template("home.html", username=current_user.username, bal = cu_bal.balance, logged_in=True)
+    cur_ln = lnAct.query.filter_by(username=current_user.username).first()
+    return render_template("home.html", username=current_user.username, bal = cu_bal.balance, cur_ln=cur_ln, logged_in=True)
 
 #logout
 @app.route('/logout')
@@ -300,12 +330,78 @@ def history():
 @app.route("/loan/avail", methods=["GET", "POST"])
 @login_required
 def loanavail():
-    return render_template("avail_loan.html", username=current_user.username)
+    cur_ln = lnAct.query.filter_by(username=current_user.username).first()
+    if request.method == 'POST':
+        c_bal = remBal.query.filter_by(username=current_user.username).first()
+        l_amount = int(request.form["amount"])
+        if l_amount > cur_ln.credits:
+            flash("Insuffecient Credits")
+        elif cur_ln.score < 500:
+            flash("Insuffecient Score")
+        else:
+            cur_ln.debt += l_amount
+            cur_ln.credits -= l_amount
+            cur_ln.score -= 0.1*(cur_ln.score)
+            db.session.commit()
+            c_bal.balance += l_amount
+            db.session.commit()
+
+            obj = lnTranscation.query.all()
+            tno = int(obj[-1].transcation_id)
+            now = datetime.now()
+            current_time = now.strftime("%H:%M:%S")
+            new_trans_ln = lnTranscation(
+                transcation_id = tno+1,
+                username = cur_ln.username,
+                amount = "-" + str(l_amount),
+                rem_debt = cur_ln.debt,
+                date = date.today(),
+                time = current_time
+            )
+            db.session.add(new_trans_ln)
+            db.session.commit()
+
+
+            flash(f"Loan amount of {l_amount} granted sucessfully")
+    return render_template("avail_loan.html", username=current_user.username, cur_ln=cur_ln)
 
 @app.route("/loan/pay", methods=["GET", "POST"])
 @login_required
 def loanpay():
-    return render_template("pay_loan.html", username=current_user.username)
+    c_bal = remBal.query.filter_by(username=current_user.username).first()
+    cur_ln = lnAct.query.filter_by(username=current_user.username).first()
+    if request.method == 'POST':
+        l_amount = int(request.form["amount"])
+        if l_amount > cur_ln.debt:
+            flash("Enterd ammount is more than total debt")
+        elif l_amount > c_bal.balance:
+            flash("Insuffecient amount in account")
+        else:
+            cur_ln.debt -= l_amount
+            cur_ln.credits += l_amount
+            cur_ln.score += 0.1*(cur_ln.score)
+            db.session.commit()
+            c_bal.balance -= l_amount
+            db.session.commit()
+
+            obj = lnTranscation.query.all()
+            tno = int(obj[-1].transcation_id)
+            now = datetime.now()
+            current_time = now.strftime("%H:%M:%S")
+            new_trans_ln = lnTranscation(
+                transcation_id = tno+1,
+                username = cur_ln.username,
+                amount = "+" + str(l_amount),
+                rem_debt = cur_ln.debt,
+                date = date.today(),
+                time = current_time
+            )
+            db.session.add(new_trans_ln)
+            db.session.commit()
+
+            flash(f"Loan amount of {l_amount} Repayed sucessfully")
+
+    return render_template("pay_loan.html", username=current_user.username, cur_ln=cur_ln, bal=c_bal.balance)
 
 if __name__ == "__main__":
     app.run(debug=True)
