@@ -220,12 +220,12 @@ def logout():
 @app.route("/pay/username", methods=["GET", "POST"])
 @login_required
 def pay_username():
+    fuser = remBal.query.filter_by(username=current_user.username).first()
     if request.method == 'POST':
         p_username = request.form["username"]
         p_amount = int(request.form["amount"])
         # remBal.query.filter_by(username=request.form.get('l_username')).first()
         # User.query.filter_by(username=l_username).first()
-        fuser = remBal.query.filter_by(username=current_user.username).first()
         print(fuser.balance, p_username, p_amount)
         if fuser.balance < p_amount:
             flash("Insuffecient amount")
@@ -260,7 +260,7 @@ def pay_username():
 
 
 
-    return render_template("pay_username.html", username=current_user.username, logged_in=True)
+    return render_template("pay_username.html", username=current_user.username, logged_in=True, bal = fuser.balance)
 
 #qr pay
 @app.route("/pay/qr", methods=["GET", "POST"])
@@ -272,12 +272,12 @@ def pay_qr():
 @app.route("/pay/phoneno", methods=["GET", "POST"])
 @login_required
 def pay_phoneno():
+    fuser = remBal.query.filter_by(username=current_user.username).first()
     if request.method == 'POST':
         p_phonenumber = request.form["pno"]
         p_amount = int(request.form["amount"])
         # remBal.query.filter_by(username=request.form.get('l_username')).first()
         # fu = User.query.filter_by(phoneno=p_phonenumber).first()
-        fuser = remBal.query.filter_by(username=current_user.username).first()
         if fuser.balance < p_amount:
             flash("Insuffecient amount")
             return redirect(url_for('pay_phoneno'))
@@ -310,7 +310,7 @@ def pay_phoneno():
                 db.session.commit()
 
 
-    return render_template("pay_phoneno.html", username=current_user.username, logged_in=True)
+    return render_template("pay_phoneno.html", username=current_user.username, logged_in=True, bal=fuser.balance)
 
 #bank transfer
 @app.route("/pay/banktransfer", methods=["GET", "POST"])
@@ -336,7 +336,7 @@ def loanavail():
         l_amount = int(request.form["amount"])
         if l_amount > cur_ln.credits:
             flash("Insuffecient Credits")
-        elif cur_ln.score < 500:
+        elif cur_ln.score < 450:
             flash("Insuffecient Score")
         else:
             cur_ln.debt += l_amount
@@ -378,7 +378,7 @@ def loanpay():
             flash("Insuffecient amount in account")
         else:
             cur_ln.debt -= l_amount
-            cur_ln.credits += l_amount
+            cur_ln.credits += (l_amount) + (0.1*l_amount)
             cur_ln.score += 0.1*(cur_ln.score)
             db.session.commit()
             c_bal.balance -= l_amount
