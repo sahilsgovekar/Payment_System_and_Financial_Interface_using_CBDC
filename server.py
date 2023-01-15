@@ -5,6 +5,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from datetime import date, datetime
 
+
+
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'any-secret-key-you-choose'
@@ -79,6 +81,7 @@ class clientTranscation(UserMixin, db.Model):
 def login_or_sign_up():
 
     #login
+    global c_u
     if request.method == "POST":
         if request.form["submit"] == "log_in":
 
@@ -95,6 +98,7 @@ def login_or_sign_up():
                 flash("Password zincorrect, PLease Try Again")
                 return redirect(url_for('login_or_sign_up'))
             else:
+
                 login_user(user)
                 return redirect(url_for('home'))
         
@@ -142,7 +146,6 @@ def login_or_sign_up():
             db.session.commit()
             
             # cursor.execute(f"INSERT INTO balances VALUES({s_username}, 100)")
-
             login_user(new_user)
             return redirect(url_for("home"))
 
@@ -170,12 +173,14 @@ def main():
 @login_required
 def home():
     # print(current_user.username)
-    return render_template("home.html", username=current_user.username, logged_in=True)
+    cu_bal = remBal.query.filter_by(username=current_user.username).first()
+    return render_template("home.html", username=current_user.username, bal = cu_bal.balance, logged_in=True)
 
 #logout
 @app.route('/logout')
 def logout():
     logout_user()
+    c_u = "null"
     return redirect(url_for('login_or_sign_up'))
 
 
@@ -282,6 +287,13 @@ def pay_phoneno():
 @login_required
 def pay_banktransfer():
     return render_template("pay_banktransfer.html")
+
+@app.route("/history", methods=["GET", "POST"])
+@login_required
+def history():
+    cu_bal = remBal.query.filter_by(username=current_user.username).first()
+    trans = clientTranscation.query.all()
+    return render_template("history.html",username=current_user.username, bal = cu_bal.balance, trans = trans)
 
 if __name__ == "__main__":
     app.run(debug=True)

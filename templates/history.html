@@ -60,45 +60,60 @@
 
             <!-- pay -->
             <div>
-                <h2 class="hr-lines"> PAY </h2>
 
                 <h3 class="bal"> Balance : {{bal}}</h3>
 
-                <div class="row  justify-content-center spacy">
-                    <div class="col-lg-6 colMenu">
-                        <a href="/pay/username" class="btn btn-outline-light btn-lg">username</a>
+                <div class="container my-3">
+                    <h2>Transactions</h2>
+
+                    {% if trans|length == 0 %}
+
+                    <div role="alert">
+                        No Transcation Found!
                     </div>
-                    <div class="col-lg-6 colMenu">
-                        <a href="/pay/qr" class="btn btn-outline-light btn-lg">QR</a>
-                    </div>
-                    <div class="col-lg-6 colMenu">
-                        <a href="/pay/phoneno" class="btn btn-outline-light btn-lg">Phone Number</a>
-                    </div>
-                    <div class="col-lg-6 colMenu">
-                        <a href="/pay/banktransfer" class="btn btn-outline-light btn-lg">Bank Transfer</a>
-                    </div>
+                    {% else %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Transcation ID</th>
+                                <th scope="col">To / From</th>
+                                <th scope="col">Amount</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Time</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for tr in trans %}
+                                <!-- {% if trans.f_username == c_u %} -->
+                                <tr>
+                                    <th scope="row">{{loop.index}}</th>
+                                    <td>{{tr.transcation_id}}</td>
+                                    <td>{{tr.t_username}}</td>
+                                    <td>{{tr.amount}}</td>
+                                    <td>{{tr.date}}</td>
+                                    <td>{{tr.time}}</td>
+                                </tr>
+
+                                <!-- {% elif trans.t_username == username %}
+                                <tr>
+                                    <th scope="row">{{loop.index}}</th>
+                                    <td>{{tr.transcation_id}}</td>
+                                    <td>{{tr.f_username}}</td>
+                                    <td>{{tr.amount}}</td>
+                                    <td>{{tr.date}}</td>
+                                    <td>{{tr.time}}</td>
+                                </tr>
+                                {% endif %} -->
+                            
+
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+
+
                 </div>
-
-                <a href="/history" class="btn btn-outline-primary">History</a>
-
-                
-
-            </div>
-
-
-            <!-- investment -->
-            <div>
-                <h2 class="hr-lines"> INVESTMENT </h2>
-
-            </div>
-
-
-            <!-- loan -->
-            <div>
-                <h2 class="hr-lines"> LOAN </h2>
-
-            </div>
-
         </main>
 
 
