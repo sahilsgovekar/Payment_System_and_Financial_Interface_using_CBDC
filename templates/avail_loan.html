@@ -28,6 +28,7 @@
 
     <link href="{{ url_for('static', filename='cover.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='homecss.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='pay.css') }}" rel="stylesheet">
 
 </head>
 
@@ -48,7 +49,6 @@
                     <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="#">Pay</a>
                     <a class="nav-link fw-bold py-1 px-0" href="#">Investment</a>
                     <a class="nav-link fw-bold py-1 px-0" href="#">Loan</a>
-                    <a class="nav-link fw-bold py-1 px-0" href="/logout">Logout</a>
                 </nav>
             </div>
         </header>
@@ -57,58 +57,29 @@
 
         <!-- main sectrion content -->
         <main class="px-3">
-
-            <!-- pay -->
             <div>
-                <h2 class="hr-lines"> PAY </h2>
-
-                <h3 class="bal"> Balance : {{bal}}</h3>
-
-                <div class="row  justify-content-center spacy">
-                    <div class="col-lg-6 colMenu">
-                        <a href="/pay/username" class="btn btn-outline-light btn-lg">username</a>
-                    </div>
-                    <div class="col-lg-6 colMenu">
-                        <a href="/pay/qr" class="btn btn-outline-light btn-lg">QR</a>
-                    </div>
-                    <div class="col-lg-6 colMenu">
-                        <a href="/pay/phoneno" class="btn btn-outline-light btn-lg">Phone Number</a>
-                    </div>
-                    <div class="col-lg-6 colMenu">
-                        <a href="/pay/banktransfer" class="btn btn-outline-light btn-lg">Bank Transfer</a>
-                    </div>
-                </div>
-
-                <a href="/history" class="btn btn-outline-primary">History</a>
-
-
-
-            </div>
-
-            <!-- loan -->
-            <div>
-                <h2 class="hr-lines"> LOAN </h2>
-
+                <h2 class="hr-lines"> Avail loan </h2>
                 <h3 class="bal">Total Debt : </h3>
                 <h3 class="bal">Credits available : </h3>
                 <h3 class="bal">Score : </h3>
+            </div>
+
+            <form action="" method="post">
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                        <p>{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                <br><br>
+                <label for="">amount</label>
                 <br>
-                <div class="row  justify-content-center spacy">
-                    <div class="col-lg-6 colMenu">
-                        <a href="/loan/avail" class="btn btn-outline-light btn-lg">Avail Loan</a>
-                    </div>
-                    <div class="col-lg-6 colMenu">
-                        <a href="/loan/pay" class="btn btn-outline-light btn-lg">Pay Loan</a>
-                    </div>
-                </div>
+                <input type="number" name="amount" id="">
+                <br><br><br>
+                <input type="submit" value="Check and Avail" class="btn btn-outline-success btn-lg">
+            </form>
 
-            </div>
-
-            <!-- investment -->
-            <div>
-                <h2 class="hr-lines"> INVESTMENT </h2>
-
-            </div>
 
 
 

@@ -295,6 +295,18 @@ def history():
     trans = clientTranscation.query.all()
     return render_template("history.html",username=current_user.username, bal = cu_bal.balance, trans = trans)
 
+
+#loan section
+@app.route("/loan/avail", methods=["GET", "POST"])
+@login_required
+def loanavail():
+    return render_template("avail_loan.html", username=current_user.username)
+
+@app.route("/loan/pay", methods=["GET", "POST"])
+@login_required
+def loanpay():
+    return render_template("pay_loan.html", username=current_user.username)
+
 if __name__ == "__main__":
     app.run(debug=True)
 
