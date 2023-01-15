@@ -403,6 +403,14 @@ def loanpay():
 
     return render_template("pay_loan.html", username=current_user.username, cur_ln=cur_ln, bal=c_bal.balance)
 
+
+@app.route("/topup", methods=["GET", "POST"])
+@login_required
+def topup():
+    return render_template("topup.html")
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)
 
