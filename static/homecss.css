@@ -61,3 +61,27 @@
   border:1px solid rgb(255, 255, 255);
   padding: 6%;
 }
+
+.szz {
+  width: 35%;
+  text-align: center;
+}
+
+.center {
+  text-align: center;
+  /*These options are for the div to be visible in the example, the important is the first*/
+  /* border:1px solid black; */
+  width: auto;
+  height: 50px;
+}
+
+.cmb {
+  display: block;
+  margin: 0 auto;
+}
+
+.adm {
+  font-size: xx-large;
+  padding-bottom: 10%;
+  padding-top: 0%;
+}

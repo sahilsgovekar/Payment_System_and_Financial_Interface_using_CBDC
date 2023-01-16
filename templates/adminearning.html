@@ -60,46 +60,31 @@
         <!-- main sectrion content -->
         <main class="px-3">
             <div>
-                <h2 class="hr-lines"> TOP UP </h2>
-                <div class="row  justify-content-center spacy">
-                    <div class="col-lg-6 colMenu">
-                        <h3 class="btn btn-secondary btn-lg"> Balance : {{bal}}</h3>
-                    </div>
-                    <div class="col-lg-6 colMenu">
-                    </div>
-                </div>
+                <h2 class="hr-lines"> ADMIN </h2>
+                <!-- <h3 class="bal">Balance : {{bal}}</h3> -->
                 <br><br>
             </div>
 
-            <form action="" method="post">
-                {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                {% for message in messages %}
-                <p>{{ message }}</p>
-                {% endfor %}
-                {% endif %}
-                {% endwith %}
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+            <p>{{ message }}</p>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
 
-                <div class="center">  
-                    <select class="form-select szz cmb" name="curr">
-                        <option selected>Select the currency</option>
-                        <option value="rupee">Rupee</option>
-                        <option value="dollar">Dollar</option>
-                        <option value="euros">Euros</option>
-                        <option value="pounds">Pounds</option>
-                        <option value="yen">Yen</option>
-                        <option value="rubel">Rubel</option>
-                      </select>
-                
-                </div>
-                <br>
-                <label for="">amount</label>
-                <br>
-                <input type="number" name="amount" id="">
-                <br><br><br>
-                <input type="submit" value="PAY" class="btn btn-outline-success btn-lg">
-            </form>
             <br><br>
+            <div class="adm">
+            <div class="bx">
+                <!-- <button type="button" class="btn btn-secondary btn-lg"> -->
+                    Loan Intrest : {{admn.loan_intrest}} <br>
+                    Transcationm Intrest : {{admn.transcationm_intrest}} <br>
+                    Top-up Fee : {{admn.topup_fee}} <br>
+                    <hr>
+                    <font color="green">Total Earning : {{admn.total}}</font>  <br>
+                <!-- </button> -->
+            </div>
+        </div>
 
 
 

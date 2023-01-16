@@ -3,9 +3,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 # import sqlite3
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+import requests
 from datetime import date, datetime
+from forex_python.converter import CurrencyRates
 
 
+currency = CurrencyRates()
 
 app = Flask(__name__)
 
@@ -49,7 +52,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(100))
     password = db.Column(db.String(100))
 
-    
+
 # cursor.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, username varchar(250) NOT NULL UNIQUE, fname varchar(250), lname varchar(250), phoneno varchar(250), email varchar(250), password varchar(250))")
    
     # usernamess = db.relationship('userBalance', backref='user')
@@ -85,8 +88,17 @@ class lnTranscation(UserMixin, db.Model):
     username = db.Column(db.String(100))
     amount = db.Column(db.String(100))
     rem_debt = db.Column(db.Integer)
+    intrest = db.Column(db.Integer)
     date = db.Column(db.String(100))
     time = db.Column(db.String(100))
+
+class Erng(UserMixin, db.Model):
+    username = db.Column(db.String(100), primary_key=True)
+    loan_intrest = db.Column(db.Integer)
+    transcationm_intrest = db.Column(db.Integer)
+    topup_fee = db.Column(db.Integer)
+    total = db.Column(db.Integer)
+    
 
 
 
@@ -221,6 +233,7 @@ def logout():
 @login_required
 def pay_username():
     fuser = remBal.query.filter_by(username=current_user.username).first()
+    admn = Erng.query.filter_by(username="admin").first()
     if request.method == 'POST':
         p_username = request.form["username"]
         p_amount = int(request.form["amount"])
@@ -239,6 +252,7 @@ def pay_username():
                 #updating database
                 tuser.balance += p_amount
                 fuser.balance -= p_amount
+                admn.transcationm_intrest = 0
                 db.session.commit()
                 flash(f"{p_amount} sucessfully sent to {p_username}")
                 obj = clientTranscation.query.all()
@@ -331,6 +345,7 @@ def history():
 @login_required
 def loanavail():
     cur_ln = lnAct.query.filter_by(username=current_user.username).first()
+    admn = Erng.query.filter_by(username="admin").first()
     if request.method == 'POST':
         c_bal = remBal.query.filter_by(username=current_user.username).first()
         l_amount = int(request.form["amount"])
@@ -339,11 +354,14 @@ def loanavail():
         elif cur_ln.score < 450:
             flash("Insuffecient Score")
         else:
-            cur_ln.debt += l_amount
+            cur_ln.debt += (l_amount) + (l_amount * 0.12)
             cur_ln.credits -= l_amount
             cur_ln.score -= 0.1*(cur_ln.score)
             db.session.commit()
             c_bal.balance += l_amount
+
+            admn.loan_intrest += (l_amount *0.12)
+            admn.total += l_amount *0.12
             db.session.commit()
 
             obj = lnTranscation.query.all()
@@ -355,6 +373,7 @@ def loanavail():
                 username = cur_ln.username,
                 amount = "-" + str(l_amount),
                 rem_debt = cur_ln.debt,
+                intrest = l_amount *0.12,
                 date = date.today(),
                 time = current_time
             )
@@ -393,6 +412,7 @@ def loanpay():
                 username = cur_ln.username,
                 amount = "+" + str(l_amount),
                 rem_debt = cur_ln.debt,
+                intrest = 0,
                 date = date.today(),
                 time = current_time
             )
@@ -407,9 +427,52 @@ def loanpay():
 @app.route("/topup", methods=["GET", "POST"])
 @login_required
 def topup():
-    return render_template("topup.html")
+    c_bal = remBal.query.filter_by(username=current_user.username).first()
+
+    if request.method == 'POST':
+        amount = int(request.form["amount"])
+        # print(curr)  
+        if request.form["curr"] == "rupee":
+            amount = amount
+        elif request.form["curr"] == "dollar":
+            amount = amount * currency.convert("USD", "INR" , 1)
+        elif request.form["curr"] == "euros":
+            amount = amount * currency.convert("EUR", "INR" , 1)
+        elif request.form["curr"] == "pounds":
+            amount = amount * currency.convert("GBP", "INR" , 1)
+        elif request.form["curr"] == "yen":
+            amount = amount * currency.convert("JPY", "INR" , 1)
+        elif request.form["curr"] == "rubel":
+            amount = amount * currency.convert("RUB", "INR" , 1)   
+            # print(amount)
+        # amount = round(amount, 2)
+        c_bal.balance += round(amount, 2)
+        db.session.commit()
+        obj = clientTranscation.query.all()
+        tno = int(obj[-1].transcation_id)
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        # f_username = fuser.username
+        new_trans = clientTranscation(
+                    transcation_id = tno + 1,
+                    f_username = "topup",
+                    t_username = current_user.username,
+                    amount = amount,
+                    date = date.today(),
+                    time = current_time
+                )
+        db.session.add(new_trans)
+        db.session.commit()
+        
+
+    return render_template("topup.html", bal=c_bal.balance, username=current_user.username,)
 
 
+@app.route("/admin", methods=["GET", "POST"])
+@login_required
+def admin():
+    admn = Erng.query.filter_by(username="admin").first()
+    return render_template("adminearning.html", admn=admn)
 
 if __name__ == "__main__":
     app.run(debug=True)
