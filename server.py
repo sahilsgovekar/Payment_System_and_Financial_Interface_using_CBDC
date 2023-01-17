@@ -99,7 +99,9 @@ class Erng(UserMixin, db.Model):
     topup_fee = db.Column(db.Integer)
     total = db.Column(db.Integer)
     
-
+class Admin(UserMixin, db.Model):
+    username = db.Column(db.String(100), primary_key=True)
+    password = db.Column(db.String(100))
 
 
 #other class section
@@ -112,7 +114,6 @@ class Erng(UserMixin, db.Model):
 def login_or_sign_up():
 
     #login
-    global c_u
     if request.method == "POST":
         if request.form["submit"] == "log_in":
 
@@ -280,7 +281,8 @@ def pay_username():
 @app.route("/pay/qr", methods=["GET", "POST"])
 @login_required
 def pay_qr():
-    return render_template("pay_qr.html")
+    fuser = remBal.query.filter_by(username=current_user.username).first()
+    return render_template("pay_qr.html",  username=current_user.username, bal = fuser.balance)
 
 #phone no pay
 @app.route("/pay/phoneno", methods=["GET", "POST"])
@@ -330,7 +332,43 @@ def pay_phoneno():
 @app.route("/pay/banktransfer", methods=["GET", "POST"])
 @login_required
 def pay_banktransfer():
-    return render_template("pay_banktransfer.html")
+    fuser = remBal.query.filter_by(username=current_user.username).first()
+    if request.method == 'POST':
+        p_phonenumber = request.form["pno"]
+        p_amount = int(request.form["amount"])
+        # remBal.query.filter_by(username=request.form.get('l_username')).first()
+        # fu = User.query.filter_by(phoneno=p_phonenumber).first()
+        if fuser.balance < p_amount:
+            flash("Insuffecient amount")
+            return redirect(url_for('pay_phoneno'))
+        else:
+            tu = User.query.filter_by(phoneno=p_phonenumber).first()
+            if not tu:
+                flash("Phone Number dosent exist")
+                return redirect(url_for('pay_username'))
+            else:
+                #updating database
+                tuser = remBal.query.filter_by(username=tu.username).first()
+                tuser.balance += p_amount
+                fuser.balance -= p_amount
+                db.session.commit()
+                flash(f"{p_amount} sucessfully sent to {p_phonenumber}")
+                obj = clientTranscation.query.all()
+                tno = int(obj[-1].transcation_id)
+                now = datetime.now()
+                current_time = now.strftime("%H:%M:%S")
+                f_username = fuser.username
+                new_trans = clientTranscation(
+                    transcation_id = tno + 1,
+                    f_username = f_username,
+                    t_username = p_phonenumber,
+                    amount = p_amount,
+                    date = date.today(),
+                    time = current_time
+                )
+                db.session.add(new_trans)
+                db.session.commit()
+    return render_template("pay_banktransfer.html", username=current_user.username, logged_in=True, bal=fuser.balance)
 
 @app.route("/history", methods=["GET", "POST"])
 @login_required
@@ -468,11 +506,36 @@ def topup():
     return render_template("topup.html", bal=c_bal.balance, username=current_user.username,)
 
 
-@app.route("/admin", methods=["GET", "POST"])
-@login_required
-def admin():
+
+
+
+#admin section
+
+@app.route("/admin/earning", methods=["GET", "POST"])
+def adminearning():
     admn = Erng.query.filter_by(username="admin").first()
     return render_template("adminearning.html", admn=admn)
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def adminlogin():
+    if request.method == "POST":
+        if request.form["submit"] == "admin_log_in":
+            a_username = request.form["a_username"]
+            a_password = request.form["a_password"]
+            print(a_password, a_username)
+            user = Admin.query.filter_by(username=a_username).first()
+
+            if not user:
+                flash("Admin credentials dosent match")
+                return redirect(url_for('adminlogin'))
+            elif not check_password_hash(user.password, a_password):
+                flash("Admin credentials pass dosent match")
+                return redirect(url_for('adminlogin'))
+            else:
+                return redirect(url_for('adminearning'))
+
+    return render_template("adminlogin.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True)

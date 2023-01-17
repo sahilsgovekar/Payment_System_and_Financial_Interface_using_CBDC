@@ -28,6 +28,7 @@
 
     <link href="{{ url_for('static', filename='cover.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='homecss.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='pay.css') }}" rel="stylesheet">
 
 </head>
 
@@ -43,7 +44,7 @@
         <!-- Heading include username from database and nav bar -->
         <header class="mb-auto">
             <div>
-                <h3 class="float-md-start mb-0">Username of user</h3>
+                <h3 class="float-md-start mb-0">{{username}}</h3>
                 <nav class="nav nav-masthead justify-content-center float-md-end">
                     <a class="nav-link fw-bold py-1 px-0" href="/home">Home</a>
                     <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="/home#pay">Pay</a>
@@ -58,6 +59,32 @@
 
         <!-- main sectrion content -->
         <main class="px-3">
+            <div>
+                <h2 class="hr-lines"> PAY QR </h2>
+                <h3 class="bal">Balance : {{bal}}</h3>
+                <br><br>
+            </div>
+
+            <form action="" method="post">
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                        <p>{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                <br><br>
+                <p>This can be used in Mobile Version after deployment</p>
+                <br><br>
+                <label for="">amount</label>
+                <br>
+                <input type="number" name="amount" id="">
+                <br><br>
+                <input type="submit" value="PAY" class="btn btn-outline-success btn-lg">
+            </form>
+            <br><br>
+
+
 
 
         </main>
@@ -66,7 +93,7 @@
 
 
         <!-- footer section -->
-        <footer class="mt-auto text-white-50">
+        <footer class="mt-auto text-white-50 foot">
             <p>Developed by <a href="https://github.com/sahilsgovekar" class="text-white">Sahil Govekar</a> and <a
                     href="https://twitter.com/sahilsgovekar" class="text-white">S Suhas</a></p>
             <p>Project repo available at <a href="https://github.com/sahilsgovekar/Payment_System_and_Financial_Interface_using_CBDC">github.com/sahilsgovekar</a></p>
