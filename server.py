@@ -103,6 +103,11 @@ class Admin(UserMixin, db.Model):
     username = db.Column(db.String(100), primary_key=True)
     password = db.Column(db.String(100))
 
+class BnkAcc(UserMixin, db.Model):
+    # __tablename__ = "client_transcation"
+    ac_no = db.Column(db.Integer, primary_key=True)
+    ifsc = db.Column(db.String(100))
+    balance = db.Column(db.Integer)
 
 #other class section
 
@@ -334,7 +339,8 @@ def pay_phoneno():
 def pay_banktransfer():
     fuser = remBal.query.filter_by(username=current_user.username).first()
     if request.method == 'POST':
-        p_phonenumber = request.form["pno"]
+        acno = int(request.form["ac_no"])
+        ifsc = request.form["ifsc"]
         p_amount = int(request.form["amount"])
         # remBal.query.filter_by(username=request.form.get('l_username')).first()
         # fu = User.query.filter_by(phoneno=p_phonenumber).first()
@@ -342,17 +348,17 @@ def pay_banktransfer():
             flash("Insuffecient amount")
             return redirect(url_for('pay_phoneno'))
         else:
-            tu = User.query.filter_by(phoneno=p_phonenumber).first()
+            tu = BnkAcc.query.filter_by(ac_no=acno).first()
             if not tu:
-                flash("Phone Number dosent exist")
+                flash("Account Dosent Exist")
                 return redirect(url_for('pay_username'))
             else:
                 #updating database
-                tuser = remBal.query.filter_by(username=tu.username).first()
-                tuser.balance += p_amount
+                # tuser = remBal.query.filter_by(username=tu.username).first()
+                tu.balance += p_amount
                 fuser.balance -= p_amount
                 db.session.commit()
-                flash(f"{p_amount} sucessfully sent to {p_phonenumber}")
+                flash(f"{p_amount} sucessfully sent to {acno}")
                 obj = clientTranscation.query.all()
                 tno = int(obj[-1].transcation_id)
                 now = datetime.now()
@@ -361,7 +367,7 @@ def pay_banktransfer():
                 new_trans = clientTranscation(
                     transcation_id = tno + 1,
                     f_username = f_username,
-                    t_username = p_phonenumber,
+                    t_username = acno,
                     amount = p_amount,
                     date = date.today(),
                     time = current_time
@@ -386,6 +392,7 @@ def loanavail():
     admn = Erng.query.filter_by(username="admin").first()
     if request.method == 'POST':
         c_bal = remBal.query.filter_by(username=current_user.username).first()
+        admin_bal = remBal.query.filter_by(username="admin").first()
         l_amount = int(request.form["amount"])
         if l_amount > cur_ln.credits:
             flash("Insuffecient Credits")
@@ -400,6 +407,7 @@ def loanavail():
 
             admn.loan_intrest += (l_amount *0.12)
             admn.total += l_amount *0.12
+            admin_bal.balance += l_amount *0.12
             db.session.commit()
 
             obj = lnTranscation.query.all()
@@ -506,6 +514,29 @@ def topup():
     return render_template("topup.html", bal=c_bal.balance, username=current_user.username,)
 
 
+@app.route("/addbankacc", methods=["GET", "POST"])
+def addbankacc():
+    if request.method == 'POST':
+        acno = int(request.form["ac_no"])
+        ifsc = request.form["ifsc"]
+        p_amount = 0
+        tu = BnkAcc.query.filter_by(ac_no=acno).first()
+        if tu:
+            flash("Account Already Exist")
+            return redirect(url_for('addbankacc'))
+        else:
+            new_acc = BnkAcc(
+                ac_no = acno,
+                ifsc = ifsc,
+                balance = p_amount
+            )
+            db.session.add(new_acc)
+            db.session.commit()
+            flash("Account Added Sucessfully")
+
+    
+
+    return render_template("addbankacc.html")
 
 
 
