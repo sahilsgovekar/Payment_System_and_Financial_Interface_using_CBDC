@@ -13,7 +13,7 @@ currency = CurrencyRates()
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'any-secret-key-you-choose'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -542,6 +542,10 @@ def addbankacc():
 
 #admin section
 
+@app.route("/admin", methods=["GET", "POST"])
+def admin():
+    return redirect(url_for("adminlogin"))
+
 @app.route("/admin/earning", methods=["GET", "POST"])
 def adminearning():
     admn = Erng.query.filter_by(username="admin").first()
@@ -566,6 +570,7 @@ def adminlogin():
                 return redirect(url_for('adminearning'))
 
     return render_template("adminlogin.html")
+
 
 
 if __name__ == "__main__":
