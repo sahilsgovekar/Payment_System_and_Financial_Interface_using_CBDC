@@ -6,6 +6,7 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, cur
 import requests
 from datetime import date, datetime
 from forex_python.converter import CurrencyRates
+import re
 
 
 currency = CurrencyRates()
@@ -111,7 +112,36 @@ class BnkAcc(UserMixin, db.Model):
 
 #other class section
 
+def password_validation(password):
+    flag = 0
 
+    while True:
+        if (len(password)<=8):
+            flag = -1
+            break
+        elif not re.search("[a-z]", password):
+            flag = -1
+            break
+        elif not re.search("[A-Z]", password):
+            flag = -1
+            break
+        elif not re.search("[0-9]", password):
+            flag = -1
+            break
+        elif not re.search("[_@$]" , password):
+            flag = -1
+            break
+        elif re.search("\s" , password):
+            flag = -1
+            break
+        else:
+            flag = 0
+            print("Valid Password")
+            break
+    if flag == 0:
+        return 1
+    else:
+        return 0
 
 
 
@@ -132,7 +162,7 @@ def login_or_sign_up():
                 flash("this username does not exist, Please Register")
                 return redirect(url_for('login_or_sign_up'))
             elif not check_password_hash(user.password, l_password):
-                flash("Password zincorrect, PLease Try Again")
+                flash("Password incorrect, PLease Try Again")
                 return redirect(url_for('login_or_sign_up'))
             else:
 
@@ -142,10 +172,10 @@ def login_or_sign_up():
         #sign up
         if request.form["submit"] == "Sign_up":
 
-            if User.query.filter_by(username=request.form.get('l_username')).first():
+            if User.query.filter_by(username=request.form.get('s_username')).first():
             #User already exists
                 flash("You've already signed up with that username, log in instead!")
-                return redirect(url_for('login'))
+                return redirect(url_for('login_or_sign_up'))
 
 
             s_username = request.form["s_username"]
@@ -155,6 +185,11 @@ def login_or_sign_up():
             s_email = request.form["s_email"]
             s_password = request.form["s_password"]
             print(s_username, s_fname, s_lname, s_phoneno, s_email, s_password)
+
+            if password_validation(s_password) == 0:
+                flash("Please match the password constrains while choosing password")
+                return redirect(url_for('login_or_sign_up'))
+
 
             hash_and_salted_password = generate_password_hash(
                 s_password,
@@ -230,6 +265,8 @@ def logout():
     logout_user()
     c_u = "null"
     return redirect(url_for('login_or_sign_up'))
+
+
 
 
 #pay section
